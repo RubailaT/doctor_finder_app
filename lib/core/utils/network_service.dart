@@ -24,7 +24,7 @@ class NetworkService {
     }
   }
 
-  Future<List<dynamic>> getList(String endpoint) async {
+  Future<List<dynamic>> getDoctorsDataList() async {
     try {
       final response = await http.get(
         Uri.parse(ApiUrls.getDoctorsData()),

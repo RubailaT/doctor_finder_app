@@ -10,7 +10,3 @@ class ServerFailure extends Failure {
 class NetworkFailure extends Failure {
   const NetworkFailure(String message) : super(message);
 }
-
-class CacheFailure extends Failure {
-  const CacheFailure(String message) : super(message);
-}

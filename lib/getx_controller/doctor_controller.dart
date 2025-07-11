@@ -1,44 +1,22 @@
-import 'package:doctor_finder_app/domain/use_cases/doctor_use_cases.dart';
-import 'package:doctor_finder_app/domain/use_cases/get_doctor_details_use_case.dart';
+import 'package:doctor_finder_app/core/constants/api_urls.dart';
+import 'package:doctor_finder_app/core/utils/network_service.dart';
+import 'package:doctor_finder_app/data/model/doctor_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../domain/entities/doctor.dart';
 
 class DoctorController extends GetxController {
-  final GetDoctorsUseCase _getDoctorsUseCase = Get.find<GetDoctorsUseCase>();
-  final GetDoctorDetailsUseCase _getDoctorDetailsUseCase =
-      Get.find<GetDoctorDetailsUseCase>();
+  final NetworkService networkService = Get.find<NetworkService>();
 
-  final RxList<Doctor> _doctors = <Doctor>[].obs;
-  final RxList<Doctor> _filteredDoctors = <Doctor>[].obs;
-  final RxBool _isLoading = false.obs;
-  final RxString _errorMessage = ''.obs;
-  final RxString _searchQuery = ''.obs;
-  final RxString _selectedGender = 'All'.obs;
-  final RxString _selectedTime = 'All'.obs;
+  // Observable variables
+  var allDoctors = <DoctorDataModel>[].obs;
+  var filteredDoctors = <DoctorDataModel>[].obs;
+  var isLoading = false.obs;
+  var errorMessage = ''.obs;
 
-  List<Doctor> get doctors => _doctors;
-  List<Doctor> get filteredDoctors => _filteredDoctors;
-  bool get isLoading => _isLoading.value;
-  String get errorMessage => _errorMessage.value;
-  String get searchQuery => _searchQuery.value;
-  String get selectedGender => _selectedGender.value;
-  String get selectedTime => _selectedTime.value;
-
-  // Available gender options based on API data
-  List<String> get genderOptions => ['All', 'Male', 'Female', 'Non-binary'];
-
-  // Available time options based on API data
-  List<String> get timeOptions => [
-    'All',
-    '08:00am',
-    '09:00am',
-    '10:00am',
-    '11:00am',
-    '12:00pm',
-    '01:00pm',
-    '02:00pm',
-  ];
+  // Filter variables
+  var searchQuery = ''.obs;
+  var selectedGender = 'All'.obs;
+  var selectedTime = 'All'.obs;
 
   @override
   void onInit() {
@@ -46,84 +24,170 @@ class DoctorController extends GetxController {
     fetchDoctors();
   }
 
+  // Fetch doctors from API
   Future<void> fetchDoctors() async {
     try {
-      _isLoading.value = true;
-      _errorMessage.value = '';
+      isLoading.value = true;
+      errorMessage.value = '';
 
-      final doctors = await _getDoctorsUseCase.call();
-      _doctors.assignAll(doctors);
-      _applyFilters();
+      print('🔄 Fetching doctors from API...');
+      final List<dynamic> response = await networkService.getDoctorsDataList();
+      final doctorsList = response
+          .map((json) => DoctorDataModel.fromJson(json))
+          .toList();
+
+      allDoctors.assignAll(doctorsList);
+      print('✅ Successfully fetched ${doctorsList.length} doctors');
+
+      applyFilters();
     } catch (e) {
-      _errorMessage.value = e.toString();
+      print('❌ API call failed: $e');
+      errorMessage.value =
+          'Failed to load doctors. Please check your internet connection.';
+      allDoctors.clear();
+      filteredDoctors.clear();
     } finally {
-      _isLoading.value = false;
+      isLoading.value = false;
     }
   }
 
-  Future<Doctor?> getDoctorDetails(String id) async {
+  // Get doctor details by ID
+  Future<DoctorDataModel?> getDoctorDetails(String id) async {
     try {
-      return await _getDoctorDetailsUseCase.call(id);
+      // First check local data
+      final localDoctor = allDoctors.firstWhereOrNull(
+        (doctor) => doctor.id == id,
+      );
+      if (localDoctor != null) {
+        return localDoctor;
+      }
+
+      // If not found locally, try API
+      final Map<String, dynamic> response = await networkService.get(
+        ApiUrls.getDoctorDetailsById(id),
+      );
+      return DoctorDataModel.fromJson(response);
     } catch (e) {
-      _errorMessage.value = e.toString();
+      print('❌ Failed to get doctor details: $e');
       return null;
     }
   }
 
+  // Filter methods
   void setSearchQuery(String query) {
-    _searchQuery.value = query;
-    _applyFilters();
+    searchQuery.value = query;
+    applyFilters();
   }
 
   void setGenderFilter(String gender) {
-    _selectedGender.value = gender;
-    _applyFilters();
+    selectedGender.value = gender;
+    applyFilters();
   }
 
   void setTimeFilter(String time) {
-    _selectedTime.value = time;
-    _applyFilters();
+    selectedTime.value = time;
+    applyFilters();
   }
 
   void clearFilters() {
-    _selectedGender.value = 'All';
-    _selectedTime.value = 'All';
-    _searchQuery.value = '';
-    _applyFilters();
+    searchQuery.value = '';
+    selectedGender.value = 'All';
+    selectedTime.value = 'All';
+    applyFilters();
   }
 
-  void _applyFilters() {
-    List<Doctor> filtered = _doctors.toList();
+  // Apply all filters
+  void applyFilters() {
+    List<DoctorDataModel> filtered = allDoctors.toList();
 
-    // Apply search filter
-    if (_searchQuery.value.isNotEmpty) {
+    print('=== FILTERING ===');
+    print('Starting with ${filtered.length} doctors');
+    print(
+      'Filters: Gender="${selectedGender.value}", Time="${selectedTime.value}", Search="${searchQuery.value}"',
+    );
+
+    // Search filter
+    if (searchQuery.value.isNotEmpty) {
+      final query = searchQuery.value.toLowerCase();
       filtered = filtered.where((doctor) {
-        return doctor.name.toLowerCase().contains(
-              _searchQuery.value.toLowerCase(),
-            ) ||
-            doctor.department.toLowerCase().contains(
-              _searchQuery.value.toLowerCase(),
-            ) ||
-            doctor.location.toLowerCase().contains(
-              _searchQuery.value.toLowerCase(),
-            );
+        return doctor.name.toLowerCase().contains(query) ||
+            doctor.department.toLowerCase().contains(query) ||
+            doctor.location.toLowerCase().contains(query);
       }).toList();
+      print('After search: ${filtered.length} doctors');
     }
 
-    // Apply gender filter
-    if (_selectedGender.value != 'All') {
-      filtered = filtered
-          .where((doctor) => doctor.gender == _selectedGender.value)
-          .toList();
+    // Gender filter
+    if (selectedGender.value != 'All') {
+      filtered = filtered.where((doctor) {
+        final doctorGender = doctor.gender.toString().toLowerCase();
+
+        if (selectedGender.value == 'Others') {
+          // "Others" includes everything except Male and Female
+          return doctorGender != 'male' && doctorGender != 'female';
+        } else {
+          // Exact match for Male/Female
+          return doctorGender == selectedGender.value.toLowerCase();
+        }
+      }).toList();
+      print('After gender filter: ${filtered.length} doctors');
     }
 
-    // Apply time filter
-    if (_selectedTime.value != 'All') {
-      filtered = filtered
-          .where((doctor) => doctor.time.contains(_selectedTime.value))
-          .toList();
+    // Time filter
+    if (selectedTime.value != 'All') {
+      filtered = filtered.where((doctor) {
+        final timeStr = doctor.time.toLowerCase();
+
+        if (selectedTime.value == 'Morning') {
+          // Morning: 6am-11:59am
+          return timeStr.contains('6:00am') ||
+              timeStr.contains('7:00am') ||
+              timeStr.contains('8:00am') ||
+              timeStr.contains('9:00am') ||
+              timeStr.contains('10:00am') ||
+              timeStr.contains('11:00am') ||
+              timeStr.contains('6am') ||
+              timeStr.contains('7am') ||
+              timeStr.contains('8am') ||
+              timeStr.contains('9am') ||
+              timeStr.contains('10am') ||
+              timeStr.contains('11am');
+        } else if (selectedTime.value == 'Evening') {
+          // Evening: 12pm onwards
+          return timeStr.contains('12:00pm') ||
+              timeStr.contains('1:00pm') ||
+              timeStr.contains('2:00pm') ||
+              timeStr.contains('3:00pm') ||
+              timeStr.contains('4:00pm') ||
+              timeStr.contains('5:00pm') ||
+              timeStr.contains('6:00pm') ||
+              timeStr.contains('7:00pm') ||
+              timeStr.contains('8:00pm') ||
+              timeStr.contains('9:00pm') ||
+              timeStr.contains('12pm') ||
+              timeStr.contains('1pm') ||
+              timeStr.contains('2pm') ||
+              timeStr.contains('3pm') ||
+              timeStr.contains('4pm') ||
+              timeStr.contains('5pm') ||
+              timeStr.contains('6pm') ||
+              timeStr.contains('7pm') ||
+              timeStr.contains('8pm') ||
+              timeStr.contains('9pm');
+        }
+        return false;
+      }).toList();
+      print('After time filter: ${filtered.length} doctors');
     }
 
-    _filteredDoctors.assignAll(filtered);
+    filteredDoctors.assignAll(filtered);
+    print('=== FINAL RESULT: ${filtered.length} doctors ===');
+  }
+
+  // Helper getter
+  bool get hasActiveFilters {
+    return selectedGender.value != 'All' ||
+        selectedTime.value != 'All' ||
+        searchQuery.value.isNotEmpty;
   }
 }
