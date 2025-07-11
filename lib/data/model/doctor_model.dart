@@ -4,17 +4,6 @@
 
 import 'dart:convert';
 
-// List<DoctorDataModel> doctorDataModelFromJson(String str) {
-//   try {
-//     return List<DoctorDataModel>.from(
-//       json.decode(str).map((x) => DoctorDataModel.fromJson(x)),
-//     );
-//   } catch (e) {
-//     print(' Error parsing JSON: $e');
-//     return [];
-//   }
-// }
-
 String doctorDataModelToJson(List<DoctorDataModel> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
