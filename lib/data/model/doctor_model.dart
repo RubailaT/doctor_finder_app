@@ -53,10 +53,10 @@ class DoctorDataModel {
         final minuteStr = minute.toString().padLeft(2, '0');
         return '$displayHour:${minuteStr}$period';
       } catch (e) {
-        return timeString; // Return original if parsing fails
+        return timeString;
       }
     }
-    return timeString; // Return as-is for normal format
+    return timeString;
   }
 
   // Handle invalid department values
