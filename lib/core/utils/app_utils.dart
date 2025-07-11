@@ -1,3 +1,4 @@
+import 'package:doctor_finder_app/components/sizedbox.dart';
 import 'package:doctor_finder_app/core/constants/color_class.dart';
 import 'package:doctor_finder_app/core/constants/textstyle_class.dart';
 import 'package:flutter/cupertino.dart';
@@ -98,12 +99,7 @@ class AppUtils {
     );
   }
 
-  static noDataFound(
-    // String iconUrl,
-    String headingText,
-    String subText,
-    BuildContext context,
-  ) {
+  static noDataFound(String headingText, String subText, BuildContext context) {
     return SizedBox(
       height: MediaQuery.of(context).size.height / 1.8,
       child: Center(
@@ -115,7 +111,7 @@ class AppUtils {
               style: TextStyleClass.primaryFont700(14, ColorClass.textSoft400),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            kHeight(8),
             Text(
               subText,
               style: TextStyleClass.primaryFont400(12, ColorClass.textSub500),
