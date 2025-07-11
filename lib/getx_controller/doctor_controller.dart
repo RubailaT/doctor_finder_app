@@ -1,7 +1,6 @@
 import 'package:doctor_finder_app/core/constants/api_urls.dart';
 import 'package:doctor_finder_app/core/utils/network_service.dart';
 import 'package:doctor_finder_app/data/model/doctor_model.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class DoctorController extends GetxController {
@@ -68,7 +67,7 @@ class DoctorController extends GetxController {
       );
       return DoctorDataModel.fromJson(response);
     } catch (e) {
-      print('❌ Failed to get doctor details: $e');
+      print('Failed to get doctor details: $e');
       return null;
     }
   }

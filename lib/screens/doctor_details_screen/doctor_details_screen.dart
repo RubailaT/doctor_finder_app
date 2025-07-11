@@ -13,7 +13,7 @@ class DoctorDetailsScreen extends StatelessWidget {
   final DoctorDetailsController controller = Get.put(DoctorDetailsController());
   final PdfGeneratorController pdfController = Get.put(
     PdfGeneratorController(),
-  ); // Add this line
+  );
 
   DoctorDetailsScreen({super.key, required this.doctorId});
 
@@ -110,32 +110,25 @@ class DoctorDetailsScreen extends StatelessWidget {
                   color: ColorClass.purple,
                 ),
                 kHeight(32),
-                // Updated ActionButtonsWidget with onTap function
                 ActionButtonsWidget(
-                  onBookAppointment: () => _generatePdf(),
-                  bookingButtonText: 'Generate PDF',
-                  bookingIcon: Icons.picture_as_pdf,
-                  bookingButtonColor: ColorClass.primaryColor,
+                  onGeneratePdf: () {
+                    final doctor = controller.doctor.value;
+                    if (doctor == null) return;
+
+                    pdfController.generateDoctorDetailsPdf(
+                      doctorName: doctor.name,
+                      consultingTime: doctor.time,
+                      location: doctor.location,
+                      department: doctor.department,
+                      gender: controller.getGenderString(),
+                    );
+                  },
                 ),
               ],
             ),
           ),
         );
       }),
-    );
-  }
-
-  // Add this method to handle PDF generation
-  void _generatePdf() {
-    final doctor = controller.doctor.value;
-    if (doctor == null) return;
-
-    pdfController.generateDoctorDetailsPdf(
-      doctorName: doctor.name,
-      consultingTime: doctor.time,
-      location: doctor.location,
-      department: doctor.department,
-      gender: controller.getGenderString(),
     );
   }
 }

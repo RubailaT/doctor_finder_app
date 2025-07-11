@@ -1,4 +1,3 @@
-// pdf_generator_controller.dart
 import 'dart:io';
 import 'package:get/get.dart';
 import 'package:pdf/pdf.dart';
@@ -30,7 +29,6 @@ class PdfGeneratorController extends GetxController {
             return pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
-                // Header
                 pw.Container(
                   child: pw.Text(
                     'Doctor Details',
@@ -44,7 +42,6 @@ class PdfGeneratorController extends GetxController {
                 ),
                 pw.SizedBox(height: 20),
 
-                // Doctor Name
                 pw.Text(
                   'Dr. $doctorName',
                   style: const pw.TextStyle(fontSize: 20),

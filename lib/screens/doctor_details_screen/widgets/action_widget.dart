@@ -5,18 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ActionButtonsWidget extends StatelessWidget {
-  final Function()? onBookAppointment;
-  final String bookingButtonText;
-  final Color bookingButtonColor;
-  final IconData bookingIcon;
+  final Function()? onGeneratePdf;
 
-  const ActionButtonsWidget({
-    Key? key,
-    this.onBookAppointment,
-    this.bookingButtonText = 'Generate PDF',
-    this.bookingButtonColor = ColorClass.primaryColor,
-    this.bookingIcon = Icons.picture_as_pdf,
-  }) : super(key: key);
+  const ActionButtonsWidget({Key? key, this.onGeneratePdf}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +22,13 @@ class ActionButtonsWidget extends StatelessWidget {
         width: double.infinity,
         height: 50,
         decoration: BoxDecoration(
-          color: bookingButtonColor,
+          color: ColorClass.primaryColor,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Material(
           color: Colors.transparent,
           child: GestureDetector(
-            onTap: isGenerating ? null : onBookAppointment,
+            onTap: isGenerating ? null : onGeneratePdf,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -48,10 +39,10 @@ class ActionButtonsWidget extends StatelessWidget {
                     child: AppUtils.loadingWidget(context, 50),
                   )
                 else
-                  Icon(bookingIcon, color: Colors.white, size: 20),
+                  Icon(Icons.picture_as_pdf, color: Colors.white, size: 20),
                 const SizedBox(width: 8),
                 Text(
-                  isGenerating ? 'Generating...' : bookingButtonText,
+                  isGenerating ? 'Generating...' : 'Generate PDF',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
