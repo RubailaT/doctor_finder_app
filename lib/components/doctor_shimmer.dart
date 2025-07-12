@@ -37,16 +37,16 @@ class DoctorCardShimmer extends StatelessWidget {
                   borderRadius: BorderRadius.circular(30),
                 ),
               ),
-              const SizedBox(width: 16),
+              kWidth(16),
               // Text shimmer
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(height: 14, width: 150, color: Colors.grey),
-                    const SizedBox(height: 8),
+                    kHeight(8),
                     Container(height: 12, width: 100, color: Colors.grey),
-                    const SizedBox(height: 8),
+                    kHeight(8),
                     Container(height: 12, width: 80, color: Colors.grey),
                   ],
                 ),

@@ -87,7 +87,7 @@ class CustomFilterContainer extends StatelessWidget {
           'Gender',
           style: TextStyleClass.primaryFont600(18, ColorClass.black),
         ),
-        const SizedBox(height: 20),
+        kHeight(20),
         Obx(() {
           final selectedGender = controller.selectedGender.value;
           const genderOptions = ['Male', 'Female', 'Others'];

@@ -110,7 +110,7 @@ class DoctorDetailsScreen extends StatelessWidget {
                   color: ColorClass.purple,
                 ),
                 kHeight(32),
-                ActionButtonsWidget(
+                GeneratePdfButton(
                   onGeneratePdf: () {
                     final doctor = controller.doctor.value;
                     if (doctor == null) return;
